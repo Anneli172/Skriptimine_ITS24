@@ -119,3 +119,6 @@ catch {
 # Taaskäivita server
 Write-Host "Server taaskäivitub..."
 Restart-Computer -Force
+
+
+Get-WindowsFeature | Where-Object { $_.Name -like "*AD*" -or $_.Name -like "*DNS*" } | Format-Table Name, DisplayName, InstallState
