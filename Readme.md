@@ -18,3 +18,57 @@ Set-DnsClientServerAddress -InterfaceAlias $adapter.Name -ServerAddresses ("127.
 Rename-Computer -NewName "AD1" -Force
 Write-Host "Arvuti nimi muudetud AD1-ks. Server taaskäivitub."
 Restart-Computer -Force
+
+Skript 2
+
+# Skript AD ja DNS teenuste paigaldamiseks
+# Salvestatakse C:\Skriptid\Install_AD_and_DNS.ps1
+
+
+
+# Paigalda AD DS ja DNS serveri rollid
+Install-WindowsFeature -Name AD-Domain-Services, DNS -IncludeManagementTools
+
+# Seadista domeen Tikerber.local
+$domain = "Tikerber.local"
+$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
+
+Install-ADDSForest `
+    -DomainName $domain `
+    -InstallDns:$true `
+    -SafeModeAdministratorPassword $safeModePassword `
+    -Force:$true
+
+Write-Host "Active Directory ja DNS paigaldatud. Server taaskäivitub."
+
+
+Skript 3
+
+# Skript DHCP serveri paigaldamiseks ja seadistamiseks
+# Salvestatakse C:\Skriptid\Install_DHCP.ps1
+
+# Loo kaust, kui seda pole
+New-Item -Path "C:\Skriptid" -ItemType Directory -Force
+
+# Paigalda DHCP serveri roll
+Install-WindowsFeature -Name DHCP -IncludeManagementTools
+
+# Teavita DHCP serverit AD-s (vajalik autoriseerimiseks)
+Add-DhcpServerInDC -DnsName "AD1.Tikerber.local" -IPAddress "10.0.21.10"
+
+# Loo DHCP skoop
+Add-DhcpServerv4Scope `
+    -Name "KOOL" `
+    -StartRange "10.0.21.100" `
+    -EndRange "10.0.21.120" `
+    -SubnetMask "255.255.255.0" `
+    -State Active
+
+# Seadista skoobi sätted (ruuter ja DNS)
+Set-DhcpServerv4OptionValue `
+    -ScopeId "10.0.21.0" `
+    -Router "10.0.21.1" `
+    -DnsServer "10.0.21.10" `
+    -DnsDomain "Tikerber.local"
+
+Write-Host "DHCP server paigaldatud ja seadistatud."
