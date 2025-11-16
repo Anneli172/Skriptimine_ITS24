@@ -122,3 +122,71 @@ Restart-Computer -Force
 
 
 Get-WindowsFeature | Where-Object { $_.Name -like "*AD*" -or $_.Name -like "*DNS*" } | Format-Table Name, DisplayName, InstallState
+
+
+
+# Skript AD ja DNS teenuste paigaldamiseks
+# Salvestatakse C:\Skriptid\ADDNS.ps1
+
+# Loo kaust, kui seda pole
+New-Item -Path "C:\Skriptid" -ItemType Directory -Force
+
+# Logi skripti käivitamine
+Write-Host "Alustan AD ja DNS paigaldust Windows Server 2025 (24H2) jaoks. $(Get-Date)"
+
+# Kontrolli AD-Domain-Services ja DNS rollide olekut
+Write-Host "Kontrollin AD-Domain-Services ja DNS rollide olekut..."
+$adFeature = Get-WindowsFeature -Name AD-Domain-Services -ErrorAction SilentlyContinue
+$dnsFeature = Get-WindowsFeature -Name DNS -ErrorAction SilentlyContinue
+
+if (-not $adFeature) {
+    Write-Host "Viga: AD-Domain-Services rolli ei leitud süsteemist. Kontrollige süsteemi konfiguratsiooni."
+    exit
+}
+if (-not $dnsFeature) {
+    Write-Host "Viga: DNS rolli ei leitud süsteemist. Paigaldan DNS rolli..."
+    Install-WindowsFeature -Name DNS -IncludeManagementTools -IncludeAllSubFeature
+} else {
+    Write-Host "DNS rolli staatus: $($dnsFeature.InstallState)"
+}
+
+# Paigalda AD-Domain-Services, kui see pole veel paigaldatud
+if ($adFeature.InstallState -ne "Installed") {
+    Write-Host "Paigaldan AD-Domain-Services rolli..."
+    Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -IncludeAllSubFeature
+} else {
+    Write-Host "AD-Domain-Services on juba paigaldatud."
+}
+
+# Kontrolli paigalduse olekut
+$adStatus = Get-WindowsFeature -Name AD-Domain-Services
+Write-Host "AD-Domain-Services staatus: $($adStatus.InstallState)"
+
+# Seadista domeen Tikerber.local
+$domain = "Tikerber.local"
+$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
+
+try {
+    Write-Host "Seadistan AD domeeni: $domain"
+    Install-ADDSForest `
+        -DomainName $domain `
+        -SafeModeAdministratorPassword $safeModePassword `
+        -NoRebootOnCompletion:$true `
+        -Force:$true `
+        -ErrorAction Stop
+
+    Write-Host "Active Directory domeen seadistatud edukalt."
+    if ($dnsFeature.InstallState -eq "Installed") {
+        Write-Host "DNS on juba paigaldatud, lisan DNS tsooni käsitsi..."
+        Add-DnsServerPrimaryZone -Name $domain -ZoneFile "$domain.dns" -ErrorAction Stop
+        Write-Host "DNS tsoon $domain loodud."
+    }
+}
+catch {
+    Write-Host "Viga AD või DNS seadistamisel: $_"
+    exit
+}
+
+# Taaskäivita server
+Write-Host "Server taaskäivitub..."
+Restart-Computer -Force
