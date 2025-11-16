@@ -200,3 +200,11 @@ AD-Domain-Services on juba paigaldatud.
 AD-Domain-Services staatus: Installed
 Seadistan AD domeeni: Tikerber.local
 Viga AD vÃµi DNS seadistamisel: Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not recognized.
+
+
+$domain = "Tikerber.local"
+$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
+Install-ADDSForest -DomainName $domain -SafeModeAdministratorPassword $safeModePassword -Force
+
+Add-DnsServerPrimaryZone -Name "Tikerber.local" -ZoneFile "Tikerber.local.dns"
+
