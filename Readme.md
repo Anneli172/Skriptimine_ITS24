@@ -72,3 +72,24 @@ Set-DhcpServerv4OptionValue `
     -DnsDomain "Tikerber.local"
 
 Write-Host "DHCP server paigaldatud ja seadistatud."
+
+
+
+
+PS C:\Skriptid> powershell -File .\ADDNS.ps1                                                                                                                                                                                                    Success Restart Needed Exit Code      Feature Result                                                                    ------- -------------- ---------      --------------                                                                    True    No             NoChangeNeeded {}
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'Inst
+allDNS' was not recognized.
+At C:\Skriptid\ADDNS.ps1:8 char:1
++ Install-ADDSForest `
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerSh
+   ell.Commands.InstallADDSForestCommand
+
+Message        : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'InstallD
+                 NS' was not recognized.
+
+Context        : Test.VerifyDcPromoCore.DCPromo.General.77
+RebootRequired : False
+Status         : Error
+
