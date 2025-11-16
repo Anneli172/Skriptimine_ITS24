@@ -190,3 +190,13 @@ catch {
 # Taaskäivita server
 Write-Host "Server taaskäivitub..."
 Restart-Computer -Force
+
+
+PS C:\Skriptid> powershell -File .\ADDNS.ps1
+Alustan AD ja DNS paigaldust Windows Server 2025 (24H2) jaoks. 11/16/2025 22:06:17
+Kontrollin AD-Domain-Services ja DNS rollide olekut...
+DNS rolli staatus: Installed
+AD-Domain-Services on juba paigaldatud.
+AD-Domain-Services staatus: Installed
+Seadistan AD domeeni: Tikerber.local
+Viga AD vÃµi DNS seadistamisel: Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not recognized.
