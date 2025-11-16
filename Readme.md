@@ -76,20 +76,46 @@ Write-Host "DHCP server paigaldatud ja seadistatud."
 
 
 
-PS C:\Skriptid> powershell -File .\ADDNS.ps1                                                                                                                                                                                                    Success Restart Needed Exit Code      Feature Result                                                                    ------- -------------- ---------      --------------                                                                    True    No             NoChangeNeeded {}
-Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'Inst
-allDNS' was not recognized.
-At C:\Skriptid\ADDNS.ps1:8 char:1
-+ Install-ADDSForest `
-+ ~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
-    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerSh
-   ell.Commands.InstallADDSForestCommand
+# Skript AD ja DNS teenuste paigaldamiseks
+# Salvestatakse C:\Skriptid\ADDNS.ps1
 
-Message        : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'InstallD
-                 NS' was not recognized.
+# Loo kaust, kui seda pole
+New-Item -Path "C:\Skriptid" -ItemType Directory -Force
 
-Context        : Test.VerifyDcPromoCore.DCPromo.General.77
-RebootRequired : False
-Status         : Error
+# Logi skripti käivitamine
+Write-Host "Alustan AD ja DNS paigaldust Windows Server 2025 (24H2) jaoks"
 
+# Paigalda AD DS ja DNS serveri rollid
+Write-Host "Paigaldan AD-Domain-Services ja DNS rolle..."
+Install-WindowsFeature -Name AD-Domain-Services, DNS -IncludeManagementTools -IncludeAllSubFeature
+
+# Kontrolli, kas rollid on paigaldatud
+$adStatus = Get-WindowsFeature -Name AD-Domain-Services
+$dnsStatus = Get-WindowsFeature -Name DNS
+Write-Host "AD-Domain-Services staatus: $($adStatus.InstallState)"
+Write-Host "DNS staatus: $($dnsStatus.InstallState)"
+
+# Seadista domeen Tikerber.local
+$domain = "Tikerber.local"
+$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
+
+try {
+    Write-Host "Seadistan AD domeeni: $domain"
+    Install-ADDSForest `
+        -DomainName $domain `
+        -InstallDns:$true `
+        -SafeModeAdministratorPassword $safeModePassword `
+        -NoRebootOnCompletion:$true `
+        -Force:$true `
+        -ErrorAction Stop
+
+    Write-Host "Active Directory ja DNS paigaldatud edukalt."
+}
+catch {
+    Write-Host "Viga AD paigaldamisel: $_"
+    exit
+}
+
+# Taaskäivita server
+Write-Host "Server taaskäivitub..."
+Restart-Computer -Force
