@@ -291,3 +291,18 @@ Aliases         : {}
 Attributes      : {ADDSForest}
 SwitchParameter : False
 
+
+
+ Install-ADDSForest -DomainName "tikerber.local" -SafeModeAdministratorPassword (ConvertTo-SecureString "Passw0rd" -AsPlainText -Force) -InstallDns -Force
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'Inst
+allDNS' was not recognized.
+At line:1 char:1
++ Install-ADDSForest -DomainName "tikerber.local" -SafeModeAdministrato ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerSh
+   ell.Commands.InstallADDSForestCommand
+
+Message
+-------
+Verification of prerequisites for Domain Controller promotion failed. The specified argument 'InstallDNS' was not re...
