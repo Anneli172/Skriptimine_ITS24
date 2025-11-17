@@ -185,3 +185,82 @@ $params = @{
 
 Write-Host "Loon domeeni tikerber.local ..." -ForegroundColor Cyan
 Install-ADDSForest @params
+
+
+
+
+PS C:\Users\Administrator> #AD paigaldamine DNSiga
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+Install-WindowsFeature DNS -IncludeManagementTools
+
+#Domeeni lillep.local loomine
+Install-ADDSForest
+    -DomainName "tikerber.local"
+    -DomainNetbiosName "TIKERBER"
+    -SafeModeAdministratorPassword (ConvertTo-SecureString "Passw0rd" -AsPlainText -Force)
+    -InstallDNS
+    -Force
+
+Success Restart Needed Exit Code      Feature Result                               
+------- -------------- ---------      --------------                               
+True    No             NoChangeNeeded {}                                           
+True    No             NoChangeNeeded {}                                           
+cmdlet Install-ADDSForest at command pipeline position 1
+Supply values for the following parameters:
+DomainName: tikerber.local
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not recognized.
+At line:6 char:1
++ Install-ADDSForest
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerShell.Commands.InstallADDSForest 
+   Command
+
+Message        : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not recognized.
+                 
+Context        : Test.VerifyDcPromoCore.DCPromo.General.77
+RebootRequired : False
+Status         : Error
+
+-DomainName : The term '-DomainName' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the
+ name, or if a path was included, verify that the path is correct and try again.
+At line:7 char:5
++     -DomainName "tikerber.local"
++     ~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (-DomainName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+-DomainNetbiosName : The term '-DomainNetbiosName' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the s
+pelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:8 char:5
++     -DomainNetbiosName "TIKERBER"
++     ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (-DomainNetbiosName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+-SafeModeAdministratorPassword : The term '-SafeModeAdministratorPassword' is not recognized as the name of a cmdlet, function, script file, or opera
+ble program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:9 char:5
++     -SafeModeAdministratorPassword (ConvertTo-SecureString "Passw0rd" ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (-SafeModeAdministratorPassword:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+-InstallDNS : The term '-InstallDNS' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the
+ name, or if a path was included, verify that the path is correct and try again.
+At line:10 char:5
++     -InstallDNS
++     ~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (-InstallDNS:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+-Force : The term '-Force' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or 
+if a path was included, verify that the path is correct and try again.
+At line:11 char:5
++     -Force
++     ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (-Force:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+
