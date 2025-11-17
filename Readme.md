@@ -264,3 +264,30 @@ At line:11 char:5
  
 
 
+
+PS C:\Users\Administrator> Install-ADDSForest -DomainName "tikerber.local" -DomainNetbiosName "TIKERBER" -SafeModeAdministratorPassword (ConvertTo-SecureString "Passw0rd" -AsPlainText -Force) -InstallDns -Force
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'Doma
+inNetbiosName' was not recognized.
+At line:1 char:1
++ Install-ADDSForest -DomainName "tikerber.local" -DomainNetbiosName "T ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerSh
+   ell.Commands.InstallADDSForestCommand
+
+Message
+-------
+Verification of prerequisites for Domain Controller promotion failed. The specified argument 'DomainNetbiosName' was...
+
+
+PS C:\Users\Administrator> (Get-Command Install-ADDSForest).Parameters["DomainNetbiosName"]
+
+
+Name            : DomainNetbiosName
+ParameterType   : System.String
+ParameterSets   : {[ADDSForest, System.Management.Automation.ParameterSetMetadata]}
+IsDynamic       : False
+Aliases         : {}
+Attributes      : {ADDSForest}
+SwitchParameter : False
+
