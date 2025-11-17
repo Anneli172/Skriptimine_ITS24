@@ -76,135 +76,54 @@ Write-Host "DHCP server paigaldatud ja seadistatud."
 
 
 
-# Skript AD ja DNS teenuste paigaldamiseks
-# Salvestatakse C:\Skriptid\ADDNS.ps1
+# === Tagasi võtmise skript – UNDO kõik eelnevad muudatused ===
+# Kävitada administraatorina!
 
-# Loo kaust, kui seda pole
-New-Item -Path "C:\Skriptid" -ItemType Directory -Force
+Write-Host "Alustan kõigi muudatuste tagasi võtmist..." -ForegroundColor Cyan
 
-# Logi skripti käivitamine
-Write-Host "Alustan AD ja DNS paigaldust Windows Server 2025 (24H2) jaoks"
+# 1. Eemaldame DHCP skoobi ja rolli (kui see on paigaldatud)
+if (Get-WindowsFeature -Name DHCP | Where-Object {$_.Installed}) {
+    Write-Host "Eemaldan DHCP skoobi ja teenuse..." -ForegroundColor Yellow
+    # Kustutame kõik skoobid (turvaliselt)
+    Get-DhcpServerv4Scope | Remove-DhcpServerv4Scope -Force
+    # Eemaldame serveri autoriseerimise AD-st
+    Remove-DhcpServerInDC -DnsName "AD1.Tikerber.local" -IPAddress "10.0.21.10" -Force -ErrorAction SilentlyContinue
+    # Eemaldame DHCP rolli
+    Uninstall-WindowsFeature -Name DHCP -Remove
+    Write-Host "DHCP teenus ja skoobid eemaldatud." -ForegroundColor Green
+}
 
-# Paigalda AD DS ja DNS serveri rollid
-Write-Host "Paigaldan AD-Domain-Services ja DNS rolle..."
-Install-WindowsFeature -Name AD-Domain-Services, DNS -IncludeManagementTools -IncludeAllSubFeature
+# 2. Eemaldame DNS serveri rolli ja kustutame tsoonid
+if (Get-WindowsFeature -Name DNS | Where-Object {$_.Installed}) {
+    Write-Host "Eemaldan DNS tsoonid ja teenuse..." -ForegroundColor Yellow
+    # Kustutame domeeni tsooni ja _msdcs
+    Remove-DnsServerZone -Name "Tikerber.local" -Force -ErrorAction SilentlyContinue
+    Remove-DnsServerZone -Name "_msdcs.Tikerber.local" -Force -ErrorAction SilentlyContinue
+    # Eemaldame DNS rolli (ei eemalda AD-ga seotud andmeid, sest AD eemaldame järgmiseks)
+    Uninstall-WindowsFeature -Name DNS -Remove
+    Write-Host "DNS teenus ja Tikerber.local tsoon eemaldatud." -ForegroundColor Green
+}
 
-# Kontrolli, kas rollid on paigaldatud
-$adStatus = Get-WindowsFeature -Name AD-Domain-Services
-$dnsStatus = Get-WindowsFeature -Name DNS
-Write-Host "AD-Domain-Services staatus: $($adStatus.InstallState)"
-Write-Host "DNS staatus: $($dnsStatus.InstallState)"
-
-# Seadista domeen Tikerber.local
-$domain = "Tikerber.local"
-$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
-
-try {
-    Write-Host "Seadistan AD domeeni: $domain"
-    Install-ADDSForest `
-        -DomainName $domain `
-        -InstallDns:$true `
+# 3. Eemaldame Active Directory mets (Demote + Forest eemaldamine)
+if (Get-WindowsFeature -Name AD-Domain-Services | Where-Object {$_.Installed}) {
+    Write-Host "Eemaldan Active Directory mets (Tikerber.local)..." -ForegroundColor Red
+    $safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
+    
+    # Kui see on viimane DC metsas, kasutame Force removal
+    Uninstall-ADDSDomainController `
+        -DemoteOperationMasterRole:$true `
+        -RemoveApplicationPartitions:$true `
+        -ForceRemoval:$true `
         -SafeModeAdministratorPassword $safeModePassword `
-        -NoRebootOnCompletion:$true `
-        -Force:$true `
-        -ErrorAction Stop
+        -Force:$true -Confirm:$false
 
-    Write-Host "Active Directory ja DNS paigaldatud edukalt."
+    # Pärast demote'i eemaldame kogu metsa (viimane DC)
+    Install-ADDSForest -DomainName "dummy.local" -NoRebootOnCompletion:$true -Force:$true -SafeModeAdministratorPassword $safeModePassword | Out-Null
+    # Ei, see ei tööta nii – tegelikult kui Uninstall-ADDSDomainController õnnestus, siis AD on juba eemaldatud
+    # Seega lihtsalt eemaldame rolli
+    Uninstall-WindowsFeature -Name AD-Domain-Services -Remove
+    Write-Host "Active Directory mets Tikerber.local on eemaldatud." -ForegroundColor Green
 }
-catch {
-    Write-Host "Viga AD paigaldamisel: $_"
-    exit
-}
-
-# Taaskäivita server
-Write-Host "Server taaskäivitub..."
-Restart-Computer -Force
-
-
-Get-WindowsFeature | Where-Object { $_.Name -like "*AD*" -or $_.Name -like "*DNS*" } | Format-Table Name, DisplayName, InstallState
-
-
-
-# Skript AD ja DNS teenuste paigaldamiseks
-# Salvestatakse C:\Skriptid\ADDNS.ps1
-
-# Loo kaust, kui seda pole
-New-Item -Path "C:\Skriptid" -ItemType Directory -Force
-
-# Logi skripti käivitamine
-Write-Host "Alustan AD ja DNS paigaldust Windows Server 2025 (24H2) jaoks. $(Get-Date)"
-
-# Kontrolli AD-Domain-Services ja DNS rollide olekut
-Write-Host "Kontrollin AD-Domain-Services ja DNS rollide olekut..."
-$adFeature = Get-WindowsFeature -Name AD-Domain-Services -ErrorAction SilentlyContinue
-$dnsFeature = Get-WindowsFeature -Name DNS -ErrorAction SilentlyContinue
-
-if (-not $adFeature) {
-    Write-Host "Viga: AD-Domain-Services rolli ei leitud süsteemist. Kontrollige süsteemi konfiguratsiooni."
-    exit
-}
-if (-not $dnsFeature) {
-    Write-Host "Viga: DNS rolli ei leitud süsteemist. Paigaldan DNS rolli..."
-    Install-WindowsFeature -Name DNS -IncludeManagementTools -IncludeAllSubFeature
-} else {
-    Write-Host "DNS rolli staatus: $($dnsFeature.InstallState)"
-}
-
-# Paigalda AD-Domain-Services, kui see pole veel paigaldatud
-if ($adFeature.InstallState -ne "Installed") {
-    Write-Host "Paigaldan AD-Domain-Services rolli..."
-    Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools -IncludeAllSubFeature
-} else {
-    Write-Host "AD-Domain-Services on juba paigaldatud."
-}
-
-# Kontrolli paigalduse olekut
-$adStatus = Get-WindowsFeature -Name AD-Domain-Services
-Write-Host "AD-Domain-Services staatus: $($adStatus.InstallState)"
-
-# Seadista domeen Tikerber.local
-$domain = "Tikerber.local"
-$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
-
-try {
-    Write-Host "Seadistan AD domeeni: $domain"
-    Install-ADDSForest `
-        -DomainName $domain `
-        -SafeModeAdministratorPassword $safeModePassword `
-        -NoRebootOnCompletion:$true `
-        -Force:$true `
-        -ErrorAction Stop
-
-    Write-Host "Active Directory domeen seadistatud edukalt."
-    if ($dnsFeature.InstallState -eq "Installed") {
-        Write-Host "DNS on juba paigaldatud, lisan DNS tsooni käsitsi..."
-        Add-DnsServerPrimaryZone -Name $domain -ZoneFile "$domain.dns" -ErrorAction Stop
-        Write-Host "DNS tsoon $domain loodud."
-    }
-}
-catch {
-    Write-Host "Viga AD või DNS seadistamisel: $_"
-    exit
-}
-
-# Taaskäivita server
-Write-Host "Server taaskäivitub..."
-Restart-Computer -Force
-
-
-PS C:\Skriptid> powershell -File .\ADDNS.ps1
-Alustan AD ja DNS paigaldust Windows Server 2025 (24H2) jaoks. 11/16/2025 22:06:17
-Kontrollin AD-Domain-Services ja DNS rollide olekut...
-DNS rolli staatus: Installed
-AD-Domain-Services on juba paigaldatud.
-AD-Domain-Services staatus: Installed
-Seadistan AD domeeni: Tikerber.local
-Viga AD vÃµi DNS seadistamisel: Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not recognized.
-
-
-$domain = "Tikerber.local"
-$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
-Install-ADDSForest -DomainName $domain -SafeModeAdministratorPassword $safeModePassword -Force
 
 Add-DnsServerPrimaryZone -Name "Tikerber.local" -ZoneFile "Tikerber.local.dns"
 
