@@ -323,3 +323,29 @@ At line:1 char:1
 Message
 -------
 Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not rec...
+
+
+
+
+Get-WindowsFeature AD-Domain-Services
+
+Display Name                                            Name                       Install State
+------------                                            ----                       -------------
+[X] Active Directory Domain Services                    AD-Domain-Services             Installed
+
+
+PS C:\Users\Administrator> Uninstall-WindowsFeature AD-Domain-Services -IncludeManagementTools
+
+Success Restart Needed Exit Code      Feature Result
+------- -------------- ---------      --------------
+False   Maybe          Failed         {}
+Uninstall-WindowsFeature : A prerequisite check for the AD-Domain-Services feature failed.
+1. The Active Directory domain controller needs to be demoted before the AD DS role can be removed.
+At line:1 char:1
++ Uninstall-WindowsFeature AD-Domain-Services -IncludeManagementTools
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (Active Directory Domain Services:ServerComponentWrapper) [Uninstall-W
+   indowsFeature], Exception
+    + FullyQualifiedErrorId : Alteration_PrerequisiteCheck_Failed,Microsoft.Windows.ServerManager.Commands.RemoveWindo
+   wsFeatureCommand
+
