@@ -306,3 +306,20 @@ At line:1 char:1
 Message
 -------
 Verification of prerequisites for Domain Controller promotion failed. The specified argument 'InstallDNS' was not re...
+
+
+
+
+PS C:\Users\Administrator> Install-ADDSForest -DomainName "tikerber.local" -SafeModeAdministratorPassword (ConvertTo-SecureString "Passw0rd" -AsPlainText -Force) -Force
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewD
+omain' was not recognized.
+At line:1 char:1
++ Install-ADDSForest -DomainName "tikerber.local" -SafeModeAdministrato ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerSh
+   ell.Commands.InstallADDSForestCommand
+
+Message
+-------
+Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not rec...
