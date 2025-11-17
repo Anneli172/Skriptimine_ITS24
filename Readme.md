@@ -75,55 +75,31 @@ Write-Host "DHCP server paigaldatud ja seadistatud."
 
 
 
-
-# === Tagasi võtmise skript – UNDO kõik eelnevad muudatused ===
+# === AINULT Active Directory metsa eemaldamine (viimane DC) ===
 # Kävitada administraatorina!
 
-Write-Host "Alustan kõigi muudatuste tagasi võtmist..." -ForegroundColor Cyan
+Import-Module ADDSDeployment -ErrorAction SilentlyContinue
 
-# 1. Eemaldame DHCP skoobi ja rolli (kui see on paigaldatud)
-if (Get-WindowsFeature -Name DHCP | Where-Object {$_.Installed}) {
-    Write-Host "Eemaldan DHCP skoobi ja teenuse..." -ForegroundColor Yellow
-    # Kustutame kõik skoobid (turvaliselt)
-    Get-DhcpServerv4Scope | Remove-DhcpServerv4Scope -Force
-    # Eemaldame serveri autoriseerimise AD-st
-    Remove-DhcpServerInDC -DnsName "AD1.Tikerber.local" -IPAddress "10.0.21.10" -Force -ErrorAction SilentlyContinue
-    # Eemaldame DHCP rolli
-    Uninstall-WindowsFeature -Name DHCP -Remove
-    Write-Host "DHCP teenus ja skoobid eemaldatud." -ForegroundColor Green
-}
+$safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
 
-# 2. Eemaldame DNS serveri rolli ja kustutame tsoonid
-if (Get-WindowsFeature -Name DNS | Where-Object {$_.Installed}) {
-    Write-Host "Eemaldan DNS tsoonid ja teenuse..." -ForegroundColor Yellow
-    # Kustutame domeeni tsooni ja _msdcs
-    Remove-DnsServerZone -Name "Tikerber.local" -Force -ErrorAction SilentlyContinue
-    Remove-DnsServerZone -Name "_msdcs.Tikerber.local" -Force -ErrorAction SilentlyContinue
-    # Eemaldame DNS rolli (ei eemalda AD-ga seotud andmeid, sest AD eemaldame järgmiseks)
-    Uninstall-WindowsFeature -Name DNS -Remove
-    Write-Host "DNS teenus ja Tikerber.local tsoon eemaldatud." -ForegroundColor Green
-}
+Write-Host "Alustan Active Directory metsa (Tikerber.local) jõuga eemaldamist..." -ForegroundColor Red
+Write-Host "See on viimane domeenikontroller – kogu mets kustutatakse!" -ForegroundColor Yellow
 
-# 3. Eemaldame Active Directory mets (Demote + Forest eemaldamine)
-if (Get-WindowsFeature -Name AD-Domain-Services | Where-Object {$_.Installed}) {
-    Write-Host "Eemaldan Active Directory mets (Tikerber.local)..." -ForegroundColor Red
-    $safeModePassword = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
-    
-    # Kui see on viimane DC metsas, kasutame Force removal
-    Uninstall-ADDSDomainController `
-        -DemoteOperationMasterRole:$true `
-        -RemoveApplicationPartitions:$true `
-        -ForceRemoval:$true `
-        -SafeModeAdministratorPassword $safeModePassword `
-        -Force:$true -Confirm:$false
+Uninstall-ADDSDomainController `
+    -DemoteOperationMasterRole:$true `
+    -RemoveApplicationPartitions:$true `
+    -ForceRemoval:$true `
+    -SafeModeAdministratorPassword $safeModePassword `
+    -Force:$true `
+    -Confirm:$false
 
-    # Pärast demote'i eemaldame kogu metsa (viimane DC)
-    Install-ADDSForest -DomainName "dummy.local" -NoRebootOnCompletion:$true -Force:$true -SafeModeAdministratorPassword $safeModePassword | Out-Null
-    # Ei, see ei tööta nii – tegelikult kui Uninstall-ADDSDomainController õnnestus, siis AD on juba eemaldatud
-    # Seega lihtsalt eemaldame rolli
-    Uninstall-WindowsFeature -Name AD-Domain-Services -Remove
-    Write-Host "Active Directory mets Tikerber.local on eemaldatud." -ForegroundColor Green
-}
+# Pärast edukat demote'i eemaldame ka AD DS rolli täielikult
+Write-Host "Eemaldan AD-Domain-Services rolli..." -ForegroundColor Yellow
+Uninstall-WindowsFeature -Name AD-Domain-Services -Remove
 
-Add-DnsServerPrimaryZone -Name "Tikerber.local" -ZoneFile "Tikerber.local.dns"
+Write-Host "Active Directory mets Tikerber.local on täielikult eemaldatud!" -ForegroundColor Green
+Write-Host "Arvuti taaskäivitub 10 sekundi pärast..." -ForegroundColor Cyan
+
+Start-Sleep -Seconds 10
+Restart-Computer -Force
 
