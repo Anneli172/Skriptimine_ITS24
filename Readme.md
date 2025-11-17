@@ -148,3 +148,40 @@ Message        : Verification of prerequisites for Domain Controller promotion f
 Context        : Test.VerifyDcPromoCore.DCPromo.General.77
 RebootRequired : False
 Status         : Error
+
+
+
+
+# === AD + DNS paigaldamine ilma ISO-ta (kasutab Microsofti servereid) ===
+# Töötab alati, kui masinal on internetiühendus
+
+Write-Host "Paigaldan AD-Domain-Services ja DNS rolli otse Microsofti serveritest..." -ForegroundColor Green
+
+# See on võti – sunnib kasutama Windows Update’i kui allikat ja ootab kauem
+Install-WindowsFeature -Name AD-Domain-Services, DNS `
+    -IncludeManagementTools `
+    -Source wim:C:\Windows\WinSxS\* `
+    -Restart:$false `
+    -ErrorAction Stop
+
+# Kui ikka aegub, proovib automaatselt Windows Update’ist tõmmata
+if (-not (Get-WindowsFeature AD-Domain-Services).Installed) {
+    Write-Host "Proovin Windows Update’ist tõmmata (võib võtta 1–3 minutit)..." -ForegroundColor Yellow
+    Install-WindowsFeature -Name AD-Domain-Services, DNS -IncludeManagementTools
+}
+
+# Veendume, et moodul on laetud
+Import-Module ADDSDeployment -Force
+
+$pass = ConvertTo-SecureString "Passw0rd" -AsPlainText -Force
+
+$params = @{
+    DomainName                    = "tikerber.local"
+    DomainNetbiosName             = "TIKERBER"
+    SafeModeAdministratorPassword = $pass
+    InstallDns                    = $true
+    Force                         = $true
+}
+
+Write-Host "Loon domeeni tikerber.local ..." -ForegroundColor Cyan
+Install-ADDSForest @params
