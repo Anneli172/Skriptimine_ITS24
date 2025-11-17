@@ -120,3 +120,31 @@ $params = @{
 }
 
 Install-ADDSForest @params
+
+
+
+PS C:\Skriptid> C:\Skriptid\dns.ps1
+Install-WindowsFeature : The server could not update the provided feature files in the time allowed.
+At C:\Skriptid\dns.ps1:1 char:1
++ Install-WindowsFeature -Name AD-Domain-Services, DNS -IncludeManageme ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationTimeout: (9fe6be53-191b-40f8-910c-e085f60d6786:Guid) [Install-WindowsFeature], Exception
+    + FullyQualifiedErrorId : GetAlterationState__CallCycleTimeout,Microsoft.Windows.ServerManager.Commands.AddWindowsFeatureCommand
+
+Success Restart Needed Exit Code      Feature Result                               
+------- -------------- ---------      --------------                               
+False   No             Failed         {}                                           
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'DomainNetbiosName' was not recogni
+zed.
+At C:\Skriptid\dns.ps1:13 char:1
++ Install-ADDSForest @params
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerShell.Commands.InstallADDSForest 
+   Command
+
+Message        : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'DomainNetbiosName' was not recognized.
+                 
+Context        : Test.VerifyDcPromoCore.DCPromo.General.77
+RebootRequired : False
+Status         : Error
