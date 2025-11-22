@@ -350,7 +350,74 @@ At line:1 char:1
    wsFeatureCommand
 
 
-kasutaja@ubuntusrv:~$ sudo sshd -T | grep -i pubkey
-pubkeyauthentication yes
-pubkeyacceptedalgorithms ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
-pubkeyauthoptions non
+PS C:\Users\Kasutaja> ssh -v kasutaja@10.0.21.100
+OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2
+debug1: Connecting to 10.0.21.100 [10.0.21.100] port 22.
+debug1: Connection established.
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_rsa type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_rsa-cert type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ecdsa type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ecdsa-cert type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ecdsa_sk type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ecdsa_sk-cert type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ed25519 type 3
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ed25519-cert type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ed25519_sk type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_ed25519_sk-cert type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_xmss type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_xmss-cert type -1
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_dsa type 3
+debug1: identity file C:\\Users\\Kasutaja/.ssh/id_dsa-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_for_Windows_9.5
+debug1: Remote protocol version 2.0, remote software version OpenSSH_9.6p1 Ubuntu-3ubuntu13.11
+debug1: compat_banner: match: OpenSSH_9.6p1 Ubuntu-3ubuntu13.11 pat OpenSSH* compat 0x04000000
+debug1: Authenticating to 10.0.21.100:22 as 'kasutaja'
+debug1: load_hostkeys: fopen C:\\Users\\Kasutaja/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen __PROGRAMDATA__\\ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen __PROGRAMDATA__\\ssh/ssh_known_hosts2: No such file or directory
+debug1: SSH2_MSG_KEXINIT sent
+debug1: SSH2_MSG_KEXINIT received
+debug1: kex: algorithm: curve25519-sha256
+debug1: kex: host key algorithm: ssh-ed25519
+debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+debug1: SSH2_MSG_KEX_ECDH_REPLY received
+debug1: Server host key: ssh-ed25519 SHA256:m4vSTyqTqgt+Y9xizepnO6eYzzF9wqzhrUAXpO9+TLg
+debug1: load_hostkeys: fopen C:\\Users\\Kasutaja/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen __PROGRAMDATA__\\ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen __PROGRAMDATA__\\ssh/ssh_known_hosts2: No such file or directory
+debug1: Host '10.0.21.100' is known and matches the ED25519 host key.
+debug1: Found key in C:\\Users\\Kasutaja/.ssh/known_hosts:5
+debug1: ssh_packet_send2_wrapped: resetting send seqnr 3
+debug1: rekey out after 134217728 blocks
+debug1: SSH2_MSG_NEWKEYS sent
+debug1: expecting SSH2_MSG_NEWKEYS
+debug1: ssh_packet_read_poll2: resetting read seqnr 3
+debug1: SSH2_MSG_NEWKEYS received
+debug1: rekey in after 134217728 blocks
+debug1: get_agent_identities: agent returned 1 keys
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_ed25519 ED25519 SHA256:DdCeEAiP83+YY+Tkp9loREBMloVqOdzSyWqZYCI9Luo agent
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_rsa
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_ecdsa
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_ecdsa_sk
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_ed25519_sk
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_xmss
+debug1: Will attempt key: C:\\Users\\Kasutaja/.ssh/id_dsa ED25519 SHA256:DdCeEAiP83+YY+Tkp9loREBMloVqOdzSyWqZYCI9Luo
+debug1: SSH2_MSG_EXT_INFO received
+debug1: kex_input_ext_info: server-sig-algs=<ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256>
+debug1: kex_ext_info_check_ver: publickey-hostbound@openssh.com=<0>
+debug1: kex_ext_info_check_ver: ping@openssh.com=<0>
+debug1: SSH2_MSG_SERVICE_ACCEPT received
+debug1: Authentications that can continue: publickey,password
+debug1: Next authentication method: publickey
+debug1: Offering public key: C:\\Users\\Kasutaja/.ssh/id_ed25519 ED25519 SHA256:DdCeEAiP83+YY+Tkp9loREBMloVqOdzSyWqZYCI9Luo agent
+debug1: Authentications that can continue: publickey,password
+debug1: Trying private key: C:\\Users\\Kasutaja/.ssh/id_rsa
+debug1: Trying private key: C:\\Users\\Kasutaja/.ssh/id_ecdsa
+debug1: Trying private key: C:\\Users\\Kasutaja/.ssh/id_ecdsa_sk
+debug1: Trying private key: C:\\Users\\Kasutaja/.ssh/id_ed25519_sk
+debug1: Trying private key: C:\\Users\\Kasutaja/.ssh/id_xmss
+debug1: Offering public key: C:\\Users\\Kasutaja/.ssh/id_dsa ED25519 SHA256:DdCeEAiP83+YY+Tkp9loREBMloVqOdzSyWqZYCI9Luo
+debug1: Authentications that can continue: publickey,password
+debug1: Next authentication method: password
