@@ -421,3 +421,8 @@ debug1: Trying private key: C:\\Users\\Kasutaja/.ssh/id_xmss
 debug1: Offering public key: C:\\Users\\Kasutaja/.ssh/id_dsa ED25519 SHA256:DdCeEAiP83+YY+Tkp9loREBMloVqOdzSyWqZYCI9Luo
 debug1: Authentications that can continue: publickey,password
 debug1: Next authentication method: password
+
+
+$ mkdir -p ~/.docker/cli-plugins/
+$ curl -SL https://github.com/docker/compose-cli/releases/download/v2.0.0-rc.1/docker-compose-linux-amd64 -o ~/.docker/cli-plugins/docker-compose
+$ chmod +x ~/.docker/cli-plugins/docker-compose
